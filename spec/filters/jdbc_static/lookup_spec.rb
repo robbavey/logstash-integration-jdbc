@@ -1,10 +1,9 @@
 # encoding: utf-8
 require_relative "../env_helper"
 require "logstash/devutils/rspec/spec_helper"
-require "logstash/filters/jdbc/lookup"
+require "logstash/filters/jdbc_static/lookup"
 
-module LogStash module Filters module Jdbc
-  describe Lookup do
+  describe LogStash::Filters::JdbcStatic::Lookup do
     describe "class method find_validation_errors" do
       context "when supplied with an invalid arg" do
         it "nil as arg, fails validation" do
@@ -249,5 +248,5 @@ module LogStash module Filters module Jdbc
       end
     end
   end
-end end end
+
 

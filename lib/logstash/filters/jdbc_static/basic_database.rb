@@ -5,7 +5,7 @@ require "sequel/adapters/jdbc"
 require "java"
 require "logstash/util/loggable"
 
-module LogStash module Filters module Jdbc
+module LogStash module Filters class JdbcStatic
   EMBEDDED_DERBY_DRIVER_CLASS = "org.apache.derby.jdbc.EmbeddedDriver".freeze
   MEMORY_DERBY_LOCAL_CONNECTION_STRING = "jdbc:derby:memory:____;create=true".freeze
   CONNECTION_ERRORS = [::Sequel::DatabaseConnectionError, ::Sequel::DatabaseDisconnectError, ::Sequel::PoolTimeout]

@@ -2,10 +2,6 @@
 require "logstash-integration-jdbc_jars"
 require "logstash/filters/base"
 require "logstash/namespace"
-require_relative "jdbc/loader"
-require_relative "jdbc/loader_schedule"
-require_relative "jdbc/repeating_load_runner"
-require_relative "jdbc/lookup_processor"
 
 # This filter can do multiple enhancements to an event in one pass.
 # Define multiple loader sources and multiple lookup targets.
@@ -14,6 +10,12 @@ require_relative "jdbc/lookup_processor"
 
 #
 module LogStash module Filters class JdbcStatic < LogStash::Filters::Base
+
+require_relative "jdbc_static/loader"
+require_relative "jdbc_static/loader_schedule"
+require_relative "jdbc_static/repeating_load_runner"
+require_relative "jdbc_static/lookup_processor"
+
   config_name "jdbc_static"
 
   # Define the loaders, an Array of Hashes, to fetch remote data and create local tables.
@@ -35,7 +37,7 @@ module LogStash module Filters class JdbcStatic < LogStash::Filters::Base
   #   }
   # ]
   # This is optional. You can provide a pre-populated local database server then no initial loaders are needed.
-  config :loaders, :required => false, :default => [], :validate => [LogStash::Filters::Jdbc::Loader]
+  config :loaders, :required => false, :default => [], :validate => [LogStash::Filters::JdbcStatic::Loader]
 
   # Define an array of Database Objects to create when the plugin first starts.
   # These will usually be the definitions to setup the local in-memory tables.
@@ -46,7 +48,7 @@ module LogStash module Filters class JdbcStatic < LogStash::Filters::Base
   # NOTE: Important! use `preserve_existing => true` to keep a table created and filled in a previous Logstash session. It will default to false and is unneeded if the database is not persistent.
   # NOTE: Important! Tables created here must have the same names as those used in the `loaders` and
   # `local_lookups` configuration options
-  config :local_db_objects, :required => false, :default => [], :validate => [LogStash::Filters::Jdbc::DbObject]
+  config :local_db_objects, :required => false, :default => [], :validate => [LogStash::Filters::JdbcStatic::DbObject]
 
   # Define the list (Array) of enhancement local_lookups to be applied to an event
   # Each entry is a hash of the query string, the target field and value and a
@@ -75,14 +77,14 @@ module LogStash module Filters class JdbcStatic < LogStash::Filters::Base
   #     "target" => "servers"
   #   }
   # ]
-  config :local_lookups, :required => true, :validate => [LogStash::Filters::Jdbc::LookupProcessor]
+  config :local_lookups, :required => true, :validate => [LogStash::Filters::JdbcStatic::LookupProcessor]
 
   # Schedule of when to periodically run loaders, in Cron format
   # for example: "* * * * *" (execute query every minute, on the minute)
   #
   # There is no schedule by default. If no schedule is given, then the loaders are run
   # exactly once.
-  config :loader_schedule, :required => false, :validate => LogStash::Filters::Jdbc::LoaderSchedule
+  config :loader_schedule, :required => false, :validate => LogStash::Filters::JdbcStatic::LoaderSchedule
 
   # Append values to the `tags` field if sql error occured
   # Alternatively, individual `tag_on_failure` arrays can be added to each lookup hash
@@ -179,18 +181,18 @@ module LogStash module Filters class JdbcStatic < LogStash::Filters::Base
   def prepare_runner
     @parsed_loaders = @loaders.map do |options|
       add_plugin_configs(options)
-      loader = Jdbc::Loader.new(options)
+      loader = Loader.new(options)
       loader.build_remote_db
       loader
     end
     runner_args = [@parsed_loaders, @local_db_objects]
-    @processor = Jdbc::LookupProcessor.new(@local_lookups, global_lookup_options)
+    @processor = JdbcStatic::LookupProcessor.new(@local_lookups, global_lookup_options)
     runner_args.unshift(@processor.local)
     if @loader_schedule
       args = []
-      @loader_runner = Jdbc::RepeatingLoadRunner.new(*runner_args)
+      @loader_runner = JdbcStatic::RepeatingLoadRunner.new(*runner_args)
       @loader_runner.initial_load
-      cronline = Jdbc::LoaderSchedule.new(@loader_schedule)
+      cronline = JdbcStatic::LoaderSchedule.new(@loader_schedule)
       cronline.to_log_string.tap do |msg|
         logger.info("Scheduler operations: #{msg}") unless msg.empty?
       end
@@ -199,7 +201,7 @@ module LogStash module Filters class JdbcStatic < LogStash::Filters::Base
       @scheduler = Rufus::Scheduler.new(rufus_args)
       @scheduler.cron(cronline.loader_schedule, @loader_runner)
     else
-      @loader_runner = Jdbc::SingleLoadRunner.new(*runner_args)
+      @loader_runner = JdbcStatic::SingleLoadRunner.new(*runner_args)
       @loader_runner.initial_load
     end
   end

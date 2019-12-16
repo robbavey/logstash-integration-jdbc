@@ -4,7 +4,7 @@ require_relative "db_object"
 require_relative "read_only_database"
 require "logstash/util/loggable"
 
-module LogStash module Filters module Jdbc
+module LogStash module Filters class JdbcStatic
   class Loader < Validatable
     include LogStash::Util::Loggable
 

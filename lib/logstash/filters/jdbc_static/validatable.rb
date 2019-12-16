@@ -1,5 +1,5 @@
 # encoding: utf-8
-module LogStash module Filters module Jdbc
+module LogStash module Filters class JdbcStatic
   class Validatable
     def self.find_validation_errors(options)
       array_of_options = Array(options)

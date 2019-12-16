@@ -2,7 +2,7 @@
 require_relative "validatable"
 require "rufus/scheduler"
 
-module LogStash module Filters module Jdbc
+module LogStash module Filters class JdbcStatic
   class LoaderSchedule < Validatable
     attr_reader :schedule_frequency, :loader_schedule
 

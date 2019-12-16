@@ -2,7 +2,7 @@
 require_relative "lookup_result"
 require "logstash/util/loggable"
 
-module LogStash module Filters module Jdbc
+module LogStash module Filters class JdbcStatic
   class Lookup
     include LogStash::Util::Loggable
 

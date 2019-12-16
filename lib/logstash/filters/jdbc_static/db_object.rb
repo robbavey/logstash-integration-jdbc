@@ -2,7 +2,7 @@
 require_relative "validatable"
 require_relative "column"
 
-module LogStash module Filters module Jdbc
+module LogStash module Filters class JdbcStatic
 
   class DbObject < Validatable
     #   {name => "servers", index_columns => ["ip"], columns => [["ip", "text"], ["name", "text"], ["location", "text"]]},
@@ -34,7 +34,7 @@ module LogStash module Filters module Jdbc
     end
 
     def inspect
-      "<LogStash::Filters::Jdbc::DbObject name: #{@name}, columns: #{@columns.inspect}>"
+      "<LogStash::Filters::JdbcStatic::DbObject name: #{@name}, columns: #{@columns.inspect}>"
     end
 
     private

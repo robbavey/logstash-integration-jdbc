@@ -1,8 +1,8 @@
 # encoding: utf-8
 require "logstash/devutils/rspec/spec_helper"
-require "logstash/filters/jdbc/loader"
+require "logstash/filters/jdbc_static/loader"
 
-describe LogStash::Filters::Jdbc::Loader do
+describe LogStash::Filters::JdbcStatic::Loader do
   let(:local_table) { "servers" }
   let(:options) do
     {

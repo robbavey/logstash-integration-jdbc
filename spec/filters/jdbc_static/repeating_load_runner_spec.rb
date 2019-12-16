@@ -1,10 +1,9 @@
 # encoding: utf-8
 require "logstash/devutils/rspec/spec_helper"
 require_relative "../shared_helpers"
-require "logstash/filters/jdbc/repeating_load_runner"
+require "logstash/filters/jdbc_static/repeating_load_runner"
 
-module LogStash module Filters module Jdbc
-  describe RepeatingLoadRunner  do
+  describe LogStash::Filters::JdbcStatic::RepeatingLoadRunner  do
     let(:local_db) { double("local_db") }
     let(:loaders) { Object.new }
     let(:local_db_objects) { [] }
@@ -21,4 +20,4 @@ module LogStash module Filters module Jdbc
       end
     end
   end
-end end end
+

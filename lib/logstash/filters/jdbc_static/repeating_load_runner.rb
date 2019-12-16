@@ -1,7 +1,7 @@
 # encoding: utf-8
 require_relative "single_load_runner"
 
-module LogStash module Filters module Jdbc
+module LogStash module Filters class JdbcStatic
   class RepeatingLoadRunner < SingleLoadRunner
    # info - attr_reader :local, :loaders, :preloaders
 

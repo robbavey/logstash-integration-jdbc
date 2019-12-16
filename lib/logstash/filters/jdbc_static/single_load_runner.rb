@@ -1,7 +1,7 @@
 # encoding: utf-8
 require_relative 'db_object'
 
-module LogStash module Filters module Jdbc
+module LogStash module Filters class JdbcStatic
   class SingleLoadRunner
 
     attr_reader :local, :loaders, :preloaders

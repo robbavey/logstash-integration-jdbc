@@ -1,9 +1,8 @@
 # encoding: utf-8
 require "logstash/devutils/rspec/spec_helper"
-require "logstash/filters/jdbc/lookup_processor"
+require "logstash/filters/jdbc_static/lookup_processor"
 
-module LogStash module Filters module Jdbc
-  describe LookupProcessor do
+  describe LogStash::Filters::JdbcStatic::LookupProcessor do
     describe "class method find_validation_errors" do
       context "when supplied with an invalid arg" do
         it "nil as arg, fails validation" do
@@ -128,5 +127,4 @@ module LogStash module Filters module Jdbc
       end
     end
   end
-end end end
 

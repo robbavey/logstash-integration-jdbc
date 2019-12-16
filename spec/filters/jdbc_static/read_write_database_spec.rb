@@ -2,12 +2,11 @@
 require "logstash/devutils/rspec/spec_helper"
 require "logstash-integration-jdbc_jars"
 require "logstash/util/password"
-require "logstash/filters/jdbc/db_object"
-require "logstash/filters/jdbc/read_write_database"
+require "logstash/filters/jdbc_static/db_object"
+require "logstash/filters/jdbc_static/read_write_database"
 require "stud/temporary"
 
-module LogStash module Filters module Jdbc
-  describe ReadWriteDatabase do
+  describe LogStash::Filters::JdbcStatic::ReadWriteDatabase do
     let(:db) { Sequel.connect('mock://mydb') }
     let(:connection_string_regex) { /jdbc:derby:memory:\w+;create=true/ }
     let(:temp_import_path_plugin) { Stud::Temporary.pathname }
@@ -26,7 +25,7 @@ module LogStash module Filters module Jdbc
         it "connects with fully specified arguments" do
           connection_str = "a connection string"
           user = "a user"
-          password = Util::Password.new("secret")
+          password = LogStash::Util::Password.new("secret")
           expect(::Sequel::JDBC).to receive(:load_driver).once.with("a driver class")
           expect(::Sequel).to receive(:connect).once.with(connection_str, {:user => user, :password => password.value, :test => true}).and_return(db)
           expect(::Sequel).to receive(:connect).once.with(connection_str, {:user => user, :password => password.value}).and_return(db)
@@ -80,11 +79,11 @@ module LogStash module Filters module Jdbc
         end
 
         it "lends the local db to a DbObject build instance method" do
-          db_object = DbObject.new("type" => "index", "name" => "servers_idx", "table" => "servers", "columns" => ["ip"])
+          db_object = LogStash::Filters::JdbcStatic::DbObject.new("type" => "index", "name" => "servers_idx", "table" => "servers", "columns" => ["ip"])
           expect(db_object).to receive(:build).once.with(db)
           read_write_db.build_db_object(db_object)
         end
       end
     end
   end
-end end end
+

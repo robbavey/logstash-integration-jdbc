@@ -1,8 +1,8 @@
 # encoding: utf-8
 require "logstash/devutils/rspec/spec_helper"
-require "logstash/filters/jdbc/db_object"
+require "logstash/filters/jdbc_static/db_object"
 
-describe LogStash::Filters::Jdbc::DbObject  do
+describe LogStash::Filters::JdbcStatic::DbObject  do
   context "various invalid non-hash arguments" do
     it "a nil does not validate" do
       instance = described_class.new(nil)

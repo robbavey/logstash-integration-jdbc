@@ -1,5 +1,5 @@
 # encoding: utf-8
-require "logstash/filters/jdbc/db_object"
+require "logstash/filters/jdbc_static/db_object"
 
 RSpec.shared_examples "a single load runner" do
 
@@ -12,7 +12,7 @@ RSpec.shared_examples "a single load runner" do
 
     it "builds local db objects and populates the local db" do
       expect(local_db).to receive(:populate_all).once.with(loaders)
-      expect(local_db).to receive(:build_db_object).once.with(instance_of(LogStash::Filters::Jdbc::DbObject))
+      expect(local_db).to receive(:build_db_object).once.with(instance_of(LogStash::Filters::JdbcStatic::DbObject))
       runner.initial_load
       expect(runner.preloaders).to be_a(Array)
       expect(runner.preloaders.size).to eq(1)

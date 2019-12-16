@@ -1,10 +1,9 @@
 # encoding: utf-8
 require "logstash/devutils/rspec/spec_helper"
 require "logstash/util/password"
-require "logstash/filters/jdbc/read_only_database"
+require "logstash/filters/jdbc_static/read_only_database"
 
-module LogStash module Filters module Jdbc
-  describe ReadOnlyDatabase do
+  describe LogStash::Filters::JdbcStatic::ReadOnlyDatabase do
     let(:db) { Sequel.connect('mock://mydb') }
     let(:connection_string) { "mock://mydb" }
     let(:driver_class) { "org.apache.derby.jdbc.EmbeddedDriver" }
@@ -22,7 +21,7 @@ module LogStash module Filters module Jdbc
         it "tests the connection with fully specified arguments" do
           connection_str = "a connection string"
           user = "a user"
-          password = Util::Password.new("secret")
+          password = LogStash::Util::Password.new("secret")
           expect(Sequel::JDBC).to receive(:load_driver).once.with("a driver class")
           expect(Sequel).to receive(:connect).once.with(connection_str, {:user => user, :password =>  password.value, :test => true}).and_return(db)
           described_class.create(connection_str, "a driver class", nil, user, password)
@@ -64,4 +63,4 @@ module LogStash module Filters module Jdbc
       end
     end
   end
-end end end
+

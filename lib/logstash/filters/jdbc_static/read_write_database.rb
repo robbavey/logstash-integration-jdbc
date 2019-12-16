@@ -1,7 +1,7 @@
 # encoding: utf-8
 require_relative "basic_database"
 
-module LogStash module Filters module Jdbc
+module LogStash module Filters class JdbcStatic
   class ReadWriteDatabase < BasicDatabase
     def repopulate_all(loaders)
       case loaders.size

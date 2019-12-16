@@ -2,7 +2,7 @@
 require_relative "lookup"
 require_relative "read_write_database"
 
-module LogStash module Filters module Jdbc
+module LogStash module Filters class JdbcStatic
   class LookupProcessor
     attr_reader :lookups, :local
 

@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-module LogStash module PluginMixins module Jdbc
+module LogStash module Inputs class Jdbc
   class StatementHandler
     def self.build_statement_handler(plugin, logger)
       klass = plugin.use_prepared_statements ? PreparedStatementHandler : NormalStatementHandler

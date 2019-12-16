@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-module LogStash module PluginMixins module JdbcStreaming
+module LogStash; module Filters; class JdbcStreaming
   class CachePayload
     attr_reader :payload
 

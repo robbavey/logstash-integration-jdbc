@@ -1,11 +1,8 @@
 # encoding: utf-8
 require "logstash/filters/base"
 require "logstash/namespace"
-require "logstash/plugin_mixins/jdbc_streaming"
-require "logstash/plugin_mixins/jdbc_streaming/cache_payload"
-require "logstash/plugin_mixins/jdbc_streaming/statement_handler"
-require "logstash/plugin_mixins/jdbc_streaming/parameter_handler"
 require "lru_redux"
+require 'logstash/plugin_mixins/shared'
 
 # This filter executes a SQL query and store the result set in the field
 # specified as `target`.
@@ -45,8 +42,11 @@ require "lru_redux"
 #   }
 # }
 #
-module LogStash module Filters class JdbcStreaming < LogStash::Filters::Base
-  include LogStash::PluginMixins::JdbcStreaming
+class LogStash::Filters::JdbcStreaming < LogStash::Filters::Base
+include LogStash::PluginMixins::Shared
+require 'logstash/filters/jdbc_streaming/cache_payload'
+require "logstash/filters/jdbc_streaming/statement_handler"
+require "logstash/filters/jdbc_streaming/parameter_handler"
 
   config_name "jdbc_streaming"
 
@@ -101,6 +101,7 @@ module LogStash module Filters class JdbcStreaming < LogStash::Filters::Base
   public
 
   def register
+
     convert_config_options
     if @use_prepared_statements
       validation_errors = validate_prepared_statement_mode
@@ -109,14 +110,14 @@ module LogStash module Filters class JdbcStreaming < LogStash::Filters::Base
       end
     else
       # symbolise and wrap value in parameter handler
-      unless @parameters.values.all?{|v| v.is_a?(PluginMixins::JdbcStreaming::ParameterHandler)}
+      unless @parameters.values.all?{|v| v.is_a?(ParameterHandler)}
         @parameters = parameters.inject({}) do |hash,(k,value)|
-          hash[k.to_sym] = PluginMixins::JdbcStreaming::ParameterHandler.build_parameter_handler(value)
+          hash[k.to_sym] = ParameterHandler.build_parameter_handler(value)
           hash
         end
       end
     end
-    @statement_handler = LogStash::PluginMixins::JdbcStreaming::StatementHandler.build_statement_handler(self)
+    @statement_handler = StatementHandler.build_statement_handler(self)
     prepare_jdbc_connection
   end
 
@@ -178,13 +179,13 @@ module LogStash module Filters class JdbcStreaming < LogStash::Filters::Base
       # mismatch in number of bind value elements to placeholder characters
       error_messages << "there is a mismatch between the number of statement `?` placeholders and :prepared_statement_bind_values array setting elements"
     end
-    unless @prepared_statement_bind_values.all?{|v| v.is_a?(PluginMixins::JdbcStreaming::ParameterHandler)}
+    unless @prepared_statement_bind_values.all?{|v| v.is_a?(ParameterHandler)}
       @prepared_statement_bind_values = prepared_statement_bind_values.map do |value|
         ParameterHandler.build_bind_value_handler(value)
       end
     end
     if prepared_statement_warn_on_constant_usage
-      warnables = @prepared_statement_bind_values.select {|handler| handler.is_a?(PluginMixins::JdbcStreaming::ConstantParameter) && handler.given_value.is_a?(String)}
+      warnables = @prepared_statement_bind_values.select {|handler| handler.is_a?(ConstantParameter) && handler.given_value.is_a?(String)}
       unless warnables.empty?
         @prepared_statement_constant_warned = true
         msg = "When using prepared statements, the following `prepared_statement_bind_values` will be treated as constants, if you intend them to be field references please use the square bracket field reference syntax e.g. '[field]'"
@@ -193,4 +194,52 @@ module LogStash module Filters class JdbcStreaming < LogStash::Filters::Base
     end
     error_messages
   end
-end end end # class LogStash::Filters::JdbcStreaming
+
+
+#   # ----
+  class RowCache
+      def initialize(size, ttl)
+        @cache = ::LruRedux::TTL::ThreadSafeCache.new(size, ttl)
+      end
+
+      def get(parameters)
+        @cache.getset(parameters) { yield }
+      end
+    end
+
+    class NoCache
+      def initialize(size, ttl) end
+
+      def get(statement)
+        yield
+      end
+    end
+
+    public
+    def prepare_jdbc_connection
+      require "sequel"
+      require "sequel/adapters/jdbc"
+      require "java"
+
+      load_driver_jars
+
+      @sequel_opts_symbols = @sequel_opts.inject({}) {|hash, (k,v)| hash[k.to_sym] = v; hash}
+      @sequel_opts_symbols[:user] = @jdbc_user unless @jdbc_user.nil? || @jdbc_user.empty?
+      @sequel_opts_symbols[:password] = @jdbc_password.value unless @jdbc_password.nil?
+
+      Sequel::JDBC.load_driver(@jdbc_driver_class)
+      @database = Sequel.connect(@jdbc_connection_string, @sequel_opts_symbols)
+      if @jdbc_validate_connection
+        @database.extension(:connection_validator)
+        @database.pool.connection_validation_timeout = @jdbc_validation_timeout
+      end
+      begin
+        @database.test_connection
+      rescue Sequel::DatabaseConnectionError => e
+        #TODO return false and let the plugin raise a LogStash::ConfigurationError
+        raise e
+      end
+    end # def prepare_jdbc_connection
+
+
+end # class LogStash::Filters::JdbcStreaming

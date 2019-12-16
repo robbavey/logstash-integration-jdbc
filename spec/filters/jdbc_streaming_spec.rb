@@ -5,6 +5,7 @@ require "sequel"
 require "sequel/adapters/jdbc"
 
 module LogStash module Filters
+
   class TestJdbcStreaming < JdbcStreaming
     attr_reader :database
   end

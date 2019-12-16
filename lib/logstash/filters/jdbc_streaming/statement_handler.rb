@@ -1,7 +1,7 @@
 # encoding: utf-8
 require "logstash/util/loggable"
 
-module LogStash module PluginMixins module JdbcStreaming
+module LogStash module Filters class JdbcStreaming
   # so as to not clash with the class of the same name and function in the jdbc input
   # this is in the `module JdbcStreaming` namespace
   # this duplication can be removed in a universal plugin

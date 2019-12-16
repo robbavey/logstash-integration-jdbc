@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-module LogStash module PluginMixins module Jdbc
+module LogStash module Inputs class Jdbc
   class CheckedCountLogger
     def initialize(logger)
       @logger = logger

@@ -1246,7 +1246,7 @@ describe LogStash::Inputs::Jdbc do
       { "statement" => "SELECT * from types_table" }
     end
     let(:logger) { double("logger", :debug? => true) }
-    let(:statement_logger) { LogStash::PluginMixins::Jdbc::CheckedCountLogger.new(logger) }
+    let(:statement_logger) { LogStash::Inputs::Jdbc::CheckedCountLogger.new(logger) }
     let(:value_tracker) { double("value tracker", :set_value => nil, :write => nil) }
     let(:msg) { 'Java::JavaSql::SQLSyntaxErrorException: Dynamic SQL Error; SQL error code = -104; Token unknown - line 1, column 105; LIMIT [SQLState:42000, ISC error code:335544634]' }
     let(:error_args) do

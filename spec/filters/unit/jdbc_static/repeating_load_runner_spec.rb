@@ -1,6 +1,6 @@
 # encoding: utf-8
 require "logstash/devutils/rspec/spec_helper"
-require_relative "../shared_helpers"
+require_relative "../../helpers/shared_helpers"
 require "logstash/filters/jdbc_static/repeating_load_runner"
 
   describe LogStash::Filters::JdbcStatic::RepeatingLoadRunner  do

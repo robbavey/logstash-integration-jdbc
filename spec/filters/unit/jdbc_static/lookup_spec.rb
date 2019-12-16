@@ -1,7 +1,7 @@
 # encoding: utf-8
-require_relative "../env_helper"
 require "logstash/devutils/rspec/spec_helper"
 require "logstash/filters/jdbc_static/lookup"
+require_relative "../../helpers/env_helper"
 
   describe LogStash::Filters::JdbcStatic::Lookup do
     describe "class method find_validation_errors" do

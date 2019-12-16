@@ -2,10 +2,6 @@
 require "logstash/util/loggable"
 
 module LogStash module Filters class JdbcStreaming
-  # so as to not clash with the class of the same name and function in the jdbc input
-  # this is in the `module JdbcStreaming` namespace
-  # this duplication can be removed in a universal plugin
-
   class StatementHandler
     def self.build_statement_handler(plugin)
       klass = plugin.use_prepared_statements ? PreparedStatementHandler : NormalStatementHandler

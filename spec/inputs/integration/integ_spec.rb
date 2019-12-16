@@ -51,11 +51,9 @@ describe LogStash::Inputs::Jdbc, :integration => true do
     end
 
     it "should not register correctly" do
-      plugin.register
-      q = Queue.new
       expect do
-        plugin.run(q)
-      end.to raise_error(::LogStash::PluginLoadingError)
+        plugin.register
+      end.to raise_error(LogStash::ConfigurationError)
     end
   end
 

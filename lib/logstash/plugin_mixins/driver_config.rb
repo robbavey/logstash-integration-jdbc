@@ -3,107 +3,28 @@
 require "logstash/config/mixin"
 require "time"
 require "date"
-require_relative "value_tracking"
-require_relative "checked_count_logger"
-require_relative "statement_handler"
 
 java_import java.util.concurrent.locks.ReentrantLock
 
-# Tentative of abstracting JDBC logic to a mixin
-# for potential reuse in other plugins (input/output)
-module LogStash  module PluginMixins module Jdbc
-  module Jdbc
-#     # This method is called when someone includes this module
-#     def self.included(base)
-#       # Add these methods to the 'base' given.
-#       base.extend(self)
-#       base.setup_jdbc_config
-#     end
+# Common code to be shared across plugins
+module LogStash module PluginMixins module DriverConfig
 
-
-
-    public
-    def setup_jdbc_config
-#       # JDBC driver library path to third party driver library. In case of multiple libraries being
-#       # required you can pass them separated by a comma.
-#       #
-#       # If not provided, Plugin will look for the driver class in the Logstash Java classpath.
-#       config :jdbc_driver_library, :validate => :string
-#
-#       # JDBC driver class to load, for exmaple, "org.apache.derby.jdbc.ClientDriver"
-#       # NB per https://github.com/logstash-plugins/logstash-input-jdbc/issues/43 if you are using
-#       # the Oracle JDBC driver (ojdbc6.jar) the correct `jdbc_driver_class` is `"Java::oracle.jdbc.driver.OracleDriver"`
-#       config :jdbc_driver_class, :validate => :string, :required => true
-#
-#       # JDBC connection string
-#       config :jdbc_connection_string, :validate => :string, :required => true
-#
-#       # JDBC user
-#       config :jdbc_user, :validate => :string, :required => true
-#
-#       # JDBC password
-#       config :jdbc_password, :validate => :password
-#
-#       # JDBC password filename
-#       config :jdbc_password_filepath, :validate => :path
-#
-#       # JDBC enable paging
-#       #
-#       # This will cause a sql statement to be broken up into multiple queries.
-#       # Each query will use limits and offsets to collectively retrieve the full
-#       # result-set. The limit size is set with `jdbc_page_size`.
-#       #
-#       # Be aware that ordering is not guaranteed between queries.
-#       config :jdbc_paging_enabled, :validate => :boolean, :default => false
-#
-#       # JDBC page size
-#       config :jdbc_page_size, :validate => :number, :default => 100000
-#
-#       # JDBC fetch size. if not provided, respective driver's default will be used
-#       config :jdbc_fetch_size, :validate => :number
-#
-#       # Connection pool configuration.
-#       # Validate connection before use.
-#       config :jdbc_validate_connection, :validate => :boolean, :default => false
-#
-#       # Connection pool configuration.
-#       # How often to validate a connection (in seconds)
-#       config :jdbc_validation_timeout, :validate => :number, :default => 3600
-#
-#       # Connection pool configuration.
-#       # The amount of seconds to wait to acquire a connection before raising a PoolTimeoutError (default 5)
-#       config :jdbc_pool_timeout, :validate => :number, :default => 5
-#
-#       # Timezone conversion.
-#       # SQL does not allow for timezone data in timestamp fields.  This plugin will automatically
-#       # convert your SQL timestamp fields to Logstash timestamps, in relative UTC time in ISO8601 format.
-#       #
-#       # Using this setting will manually assign a specified timezone offset, instead
-#       # of using the timezone setting of the local machine.  You must use a canonical
-#       # timezone, *America/Denver*, for example.
-#       config :jdbc_default_timezone, :validate => :string
-#
-#       # General/Vendor-specific Sequel configuration options.
-#       #
-#       # An example of an optional connection pool configuration
-#       #    max_connections - The maximum number of connections the connection pool
-#       #
-#       # examples of vendor-specific options can be found in this
-#       # documentation page: https://github.com/jeremyevans/sequel/blob/master/doc/opening_databases.rdoc
-#       config :sequel_opts, :validate => :hash, :default => {}
-#
-#       # Log level at which to log SQL queries, the accepted values are the common ones fatal, error, warn,
-#       # info and debug. The default value is info.
-#       config :sql_log_level, :validate => [ "fatal", "error", "warn", "info", "debug" ], :default => "info"
-#
-#       # Maximum number of times to try connecting to database
-#       config :connection_retry_attempts, :validate => :number, :default => 1
-#       # Number of seconds to sleep between connection attempts
-#       config :connection_retry_attempts_wait_time, :validate => :number, :default => 0.5
-#
-#       # give users the ability to force Sequel application side into using local timezone
-#       config :plugin_timezone, :validate => ["local", "utc"], :default => "utc"
+public
+    def load_driver_jars
+      unless @jdbc_driver_library.nil? || @jdbc_driver_library.empty?
+        @jdbc_driver_library.split(",").each do |driver_jar|
+          begin
+            @logger.debug("loading #{driver_jar}")
+            # Use https://github.com/jruby/jruby/wiki/CallingJavaFromJRuby#from-jar-files to make classes from jar
+            # available
+            require driver_jar
+          rescue LoadError => e
+            raise LogStash::PluginLoadingError, "unable to load #{driver_jar} from :jdbc_driver_library, #{e.message}"
+          end
+        end
+      end
     end
+
 
 #     private
 #     def jdbc_connect
@@ -137,6 +58,8 @@ module LogStash  module PluginMixins module Jdbc
 #         sleep(@connection_retry_attempts_wait_time)
 #       end
 #     end
+
+# public
 #
 #     private
 #     def open_jdbc_connection
@@ -276,7 +199,7 @@ module LogStash  module PluginMixins module Jdbc
 #         value
 #       end
 #     end
-#   end
+
 end end end
 
 

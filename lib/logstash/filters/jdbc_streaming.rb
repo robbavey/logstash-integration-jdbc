@@ -2,7 +2,8 @@
 require "logstash/filters/base"
 require "logstash/namespace"
 require "lru_redux"
-require 'logstash/plugin_mixins/common'
+require 'logstash/plugin_mixins/common_config'
+require 'logstash/plugin_mixins/driver_config'
 
 # This filter executes a SQL query and store the result set in the field
 # specified as `target`.
@@ -43,7 +44,8 @@ require 'logstash/plugin_mixins/common'
 # }
 #
 class LogStash::Filters::JdbcStreaming < LogStash::Filters::Base
-include LogStash::PluginMixins::Common
+include LogStash::PluginMixins::CommonConfig
+include LogStash::PluginMixins::DriverConfig
 require 'logstash/filters/jdbc_streaming/cache_payload'
 require "logstash/filters/jdbc_streaming/statement_handler"
 require "logstash/filters/jdbc_streaming/parameter_handler"
@@ -240,6 +242,4 @@ require "logstash/filters/jdbc_streaming/parameter_handler"
         raise e
       end
     end # def prepare_jdbc_connection
-
-
 end # class LogStash::Filters::JdbcStreaming

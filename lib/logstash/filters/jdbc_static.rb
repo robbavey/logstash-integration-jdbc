@@ -2,6 +2,7 @@
 require "logstash-integration-jdbc_jars"
 require "logstash/filters/base"
 require "logstash/namespace"
+require 'logstash/plugin_mixins/common_config'
 
 # This filter can do multiple enhancements to an event in one pass.
 # Define multiple loader sources and multiple lookup targets.
@@ -10,7 +11,7 @@ require "logstash/namespace"
 
 #
 module LogStash module Filters class JdbcStatic < LogStash::Filters::Base
-
+  include LogStash::PluginMixins::CommonConfig
 require_relative "jdbc_static/loader"
 require_relative "jdbc_static/loader_schedule"
 require_relative "jdbc_static/repeating_load_runner"
@@ -93,37 +94,8 @@ require_relative "jdbc_static/lookup_processor"
   # Append values to the `tags` field if no record was found and default values were used
   config :tag_on_default_use, :validate => :array, :default => ["_jdbcstaticdefaultsused"]
 
-  # Remote Load DB Jdbc driver library path to third party driver library.
-  # Use comma separated paths in one string if you need more than one library.
-  config :jdbc_driver_library, :validate => :string
-
-  # Remote Load DB Jdbc driver class to load, for example "oracle.jdbc.OracleDriver" or "org.apache.derby.jdbc.ClientDriver"
-  config :jdbc_driver_class, :validate => :string, :required => true
-
-  # Remote Load DB Jdbc connection string
-  config :jdbc_connection_string, :validate => :string, :required => true
-
-  # Remote Load DB Jdbc user
-  config :jdbc_user, :validate => :string
-
-  # Remote Load DB Jdbc password
-  config :jdbc_password, :validate => :password
-
   # directory for temp files created during bulk loader import.
   config :staging_directory, :validate => :string, :default => ::File.join(Dir.tmpdir, "logstash", config_name, "import_data")
-
-  # NOTE: For the initial release, we are not allowing the user to specify their own local lookup JDBC DB settings.
-  # In the near future we have to consider identical config running in multiple pipelines stomping over each other
-  # when the database names are common across configs because there is only one Derby server in memory per JVM.
-
-  # Local Lookup DB Jdbc driver class to load, for example "org.apache.derby.jdbc.ClientDriver"
-  # config :lookup_jdbc_driver_class, :validate => :string, :required => false
-
-  # Local Lookup DB Jdbc driver library path to third party driver library.
-  # config :lookup_jdbc_driver_library, :validate => :path, :required => false
-
-  # Local Lookup DB Jdbc connection string
-  # config :lookup_jdbc_connection_string, :validate => :string, :required => false
 
   class << self
     alias_method :old_validate_value, :validate_value

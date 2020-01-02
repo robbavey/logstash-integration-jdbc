@@ -1,7 +1,8 @@
 # encoding: utf-8
 require "logstash/inputs/base"
 require "logstash/namespace"
-require "logstash/plugin_mixins/common"
+require "logstash/plugin_mixins/common_config"
+require "logstash/plugin_mixins/driver_config"
 
 # this require_relative returns early unless the JRuby version is between 9.2.0.0 and 9.2.8.0
 require_relative "tzinfo_jruby_patch"
@@ -126,7 +127,8 @@ require_relative "tzinfo_jruby_patch"
 # ---------------------------------------------------------------------------------------------------
 #
 module LogStash module Inputs class Jdbc < LogStash::Inputs::Base
-  include LogStash::PluginMixins::Common
+  include LogStash::PluginMixins::CommonConfig
+  include LogStash::PluginMixins::DriverConfig
   require 'logstash/inputs/jdbc/checked_count_logger'
   require "logstash/inputs/jdbc/statement_handler"
   require "logstash/inputs/jdbc/value_tracking"

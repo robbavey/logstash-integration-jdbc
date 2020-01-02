@@ -7,30 +7,15 @@ require "date"
 java_import java.util.concurrent.locks.ReentrantLock
 
 # Common code to be shared across plugins
-module LogStash module PluginMixins module Common
+module LogStash module PluginMixins module CommonConfig
  def self.included(base)
     base.extend(self)
     base.generic_jdbc_config
   end
 
-public
-    def load_driver_jars
-      unless @jdbc_driver_library.nil? || @jdbc_driver_library.empty?
-        @jdbc_driver_library.split(",").each do |driver_jar|
-          begin
-            @logger.debug("loading #{driver_jar}")
-            # Use https://github.com/jruby/jruby/wiki/CallingJavaFromJRuby#from-jar-files to make classes from jar
-            # available
-            require driver_jar
-          rescue LoadError => e
-            raise LogStash::PluginLoadingError, "unable to load #{driver_jar} from :jdbc_driver_library, #{e.message}"
-          end
-        end
-      end
-    end
 
     def generic_jdbc_config
-    require "logstash/config/mixin"
+      require "logstash/config/mixin"
       # JDBC driver library path to third party driver library. In case of multiple libraries being
       # required you can pass them separated by a comma.
       #

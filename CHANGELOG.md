@@ -2,6 +2,9 @@
   - Fixed issue where a lost connection to the database can cause errors when using prepared statements with the scheduler [#25](https://github.com/logstash-plugins/logstash-integration-jdbc/pull/25)
 
 ## 5.0.2
+  - Fixed issue where a lost connection to the database can cause errors when using prepared statements with the scheduler [#25](https://github.com/logstash-plugins/logstash-integration-jdbc/pull/25)
+
+## 5.0.2
   - Fixed potential resource leak by ensuring scheduler is shutdown when a pipeline encounter an error during the running [#28](https://github.com/logstash-plugins/logstash-integration-jdbc/pull/28)
 
 ## 5.0.1

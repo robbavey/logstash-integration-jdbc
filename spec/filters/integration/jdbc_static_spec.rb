@@ -136,7 +136,7 @@ module LogStash module Filters
     describe "scheduled operation" do
       context "given a loader_schedule" do
         it "should properly schedule" do
-          settings["loader_schedule"] = "*/10 * * * * * UTC"
+          settings["loader_schedule"] = "*/3 * * * * * UTC"
           Timecop.travel(Time.now.utc - 3600)
           Timecop.scale(60)
           static_filter = JdbcStatic.new(settings)
